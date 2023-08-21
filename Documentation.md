@@ -1,1 +1,200 @@
+# Task:- Deploy React JS application on EKS single node cluster through HELM.
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 1:- At first launched EC2-t2.micro ubuntu machine then launched EKS single node cluster using Bash script.
+         Where I set variables for CLUSTER_NAME, REGION, NODE_INSTANCE_TYPE. Lauched single node EKS Cluster.
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+==================
+Bash Script
+==================
+
+#!/bin/bash
+
+# Set your desired values
+CLUSTER_NAME="Yameen-cluster-1"
+REGION="ap-south-1"
+NODE_INSTANCE_TYPE="t2.medium"
+
+# Install eksctl if not already installed
+if ! command -v eksctl &>/dev/null;
+then
+    echo "eksctl not found. Installing eksctl..."
+    sudo curl --silent --location "https://github.com/weaveworks/eksctl/releases/eksctl_$(uname -s)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin
+fi
+
+# Create EKS cluster
+eksctl create cluster \
+    --name $CLUSTER_NAME \
+    --region $REGION \
+    --node-type $NODE_INSTANCE_TYPE \
+    --nodes-min 1 \
+    --nodes-max 1
+
+# Check cluster status
+eksctl get cluster --name $CLUSTER_NAME
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 2:- Created "Hello-World" using Node.JS in local machine and run on 3000 port no. Then created the repository on Github and pushed React JS application on Github.
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 3:- Then on client machine Installed Docker. Because to test "Hello-World" app on Docker container.
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+$ sudo apt-get update -y
+$ sudo apt-get install docker -y
+$ sudo service docker start
+
+# add ubuntu to docker group by executing below command
+$ sudo usermod -aG docker ubuntu
+
+#Restart the session
+$ exit
+
+$ docker info
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 4:- Then Installed Git package on client machine and cloned the "Hello-World-app" repo.
+         https://github.com/YameenGithub/hello-world-app.git
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 5:- Then created Dockerfile and build and pushed to Docker Hub
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+==============
+vi Dockerfile
+==============
+FROM node:latest
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+
+$ docker build -t <yameen11/hello-world> .
+
+$ docker tag yameen11/hello-world:latest
+
+$ docker push yameen11/hello-world:latest
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 6:- Then tested React JS "Hello-World" app on kubernetes by creating manifest. Then exposed outside using load balancer
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: reactwebapppod
+  labels:
+    app: reactwebapp #very imp
+spec:
+  containers:
+  - name: reactwebappcontainer
+    image: yameen11/hello-world
+    ports:
+      - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reactwebappsvc
+spec:
+  type: LoadBalancer
+  selector:
+    app: reactwebapp  #POD label
+  ports:
+    - port: 80
+      targetPort: 3000
+...
+
+Then it successfully run on kubernetes cluster as well.
+
+++++++++++++++++++++++++++++++++++++++++++++
+STEP 7:- HELM installation and deployment
+++++++++++++++++++++++++++++++++++++++++++++
+
+$ curl -fsSl -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+
+$ chmod 700 get_helm.sh
+
+$ ./get_helm.sh
+
+$ helm
+
+Then using HELM created chart of "Hello-World"
+
+$ helm create hello-world-chart
+
+$ cd hello-world-chart
+
+$ vi values.yaml
+
+then edited necessary configurations such as image name, container port.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 8:- Installed the Helm chart on EKS cluster using the following command:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+$ helm install hello-world-chart ./hello-world-chart
+
+then deployed "hello-world" on EKS CLuster through HELM.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 9:- Created Role Based Access Control through HELM
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Roles for different user e.g Developer, Admin, Viewer
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 10:- Installed Grafana & Prometheus to monitor application
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Add the latest helm repository in Kubernetes
+$ helm repo add stable https://charts.helm.sh/stable
+
+# Add prometheus repo to helm
+$ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+# Update Helm Repo
+$ helm repo update
+
+# install prometheus
+$ helm install stable prometheus-community/kube-prometheus-stack
+
+# Check the services 
+$ kubectl get svc
+
+# By default prometheus and grafana services are available within the cluster as ClusterIP, to access them outside lets change it to NodePort / LoadBalancer.
+
+# Edit Prometheus Service & change service type to LoadBalancer then save and close that file
+$ kubectl edit svc stable-kube-prometheus-sta-prometheus
+
+# Now edit the grafana service & change service type to LoadBalancer then save and close that file
+$ kubectl edit svc stable-grafana
+
+# Verify the service if changed to LoadBalancer
+$ kubectl get svc
+
+=> Access Promethues server using LoadBalancer URL	
+
+			URL : http://LBR-URL:9090/	
+
+=> Access Grafana server using LoadBalancer URL
+
+			URL : http://LBR-URL/
+
+=> Use below credentials to login into grafana server
+
+UserName: admin
+Password: prom-operator
 
