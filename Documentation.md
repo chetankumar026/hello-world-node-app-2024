@@ -1,9 +1,8 @@
 # Task:- Deploy React JS application on EKS single node cluster through HELM.
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 STEP 1:- At first launched EC2-t2.micro ubuntu machine then launched EKS single node cluster using Bash script.
          Where I set variables for CLUSTER_NAME, REGION, NODE_INSTANCE_TYPE. Lauched single node EKS Cluster.
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+	 
 ==================
 Bash Script
 ==================
@@ -33,13 +32,11 @@ eksctl create cluster \
 # Check cluster status
 eksctl get cluster --name $CLUSTER_NAME
 
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-STEP 2:- Created "Hello-World" using Node.JS in local machine and run on 3000 port no. Then created the repository on Github and pushed React JS application on Github.
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+STEP 2:- Created "Hello-World" using Node.JS in local machine and run on 3000 port no. Then created the repository on Github and pushed React JS application on Github.
+
+
 STEP 3:- Then on client machine Installed Docker. Because to test "Hello-World" app on Docker container.
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 $ sudo apt-get update -y
 $ sudo apt-get install docker -y
@@ -52,14 +49,12 @@ $ sudo usermod -aG docker ubuntu
 $ exit
 
 $ docker info
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 STEP 4:- Then Installed Git package on client machine and cloned the "Hello-World-app" repo.
          https://github.com/YameenGithub/hello-world-app.git
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 STEP 5:- Then created Dockerfile and build and pushed to Docker Hub
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ==============
 vi Dockerfile
@@ -86,9 +81,8 @@ $ docker tag yameen11/hello-world:latest
 
 $ docker push yameen11/hello-world:latest
 
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 STEP 6:- Then tested React JS "Hello-World" app on kubernetes by creating manifest. Then exposed outside using load balancer
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ---
 apiVersion: v1
@@ -119,9 +113,7 @@ spec:
 
 Then it successfully run on kubernetes cluster as well.
 
-++++++++++++++++++++++++++++++++++++++++++++
 STEP 7:- HELM installation and deployment
-++++++++++++++++++++++++++++++++++++++++++++
 
 $ curl -fsSl -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
 
@@ -141,23 +133,17 @@ $ vi values.yaml
 
 then edited necessary configurations such as image name, container port.
 
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 STEP 8:- Installed the Helm chart on EKS cluster using the following command:
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 $ helm install hello-world-chart ./hello-world-chart
 
 then deployed "hello-world" on EKS CLuster through HELM.
 
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 STEP 9:- Created Role Based Access Control through HELM
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Roles for different user e.g Developer, Admin, Viewer
 
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 STEP 10:- Installed Grafana & Prometheus to monitor application
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Add the latest helm repository in Kubernetes
 $ helm repo add stable https://charts.helm.sh/stable
