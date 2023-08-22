@@ -37,7 +37,9 @@ eksctl get cluster --name $CLUSTER_NAME
 STEP 2:- Created "Hello-World" using Node.JS in local machine and run on 3000 port no. Then created the repository on Github and pushed React JS application on Github.
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 STEP 3:- Then on client machine Installed Docker. Because to test "Hello-World" app on Docker container.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 $ sudo apt-get update -y
 $ sudo apt-get install docker -y
